@@ -1,4 +1,4 @@
-#Netty 笔记
+# Netty 笔记
 ## java I/O基础，技术铺垫
 ### BIO    
 * 同步阻塞式I/O：  
