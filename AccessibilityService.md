@@ -127,3 +127,194 @@
     | --------    | -----   |
     |findAccessibilityNodeInfosByViewId(String str)|通过View的id查找对应的控件|
     |findAccessibilityNodeInfosByText(String str)|通过View的text或者description查找对应的控件|
+
+
+## 项目代码
+
+* 客户端收到指令分发
+    ```
+    private void handMessage() {
+        //curEntity不等于空 ，并且在微信页面
+        if (curEntity != null) {
+            if (AccessibilityHelper.getInstance().isRightUIByUIName(WX_PACKAGE_NAME)) {
+                setActionOverTimeListener();
+                switch (curEntity.getCmdType()) {
+                    case CmdType.CREATE_GROUP:
+                        handCreateGroup();
+                        break;
+                    case CmdType.SEND_TXT_MSG:
+                        dispatchHandMessage(curEntity);
+                        break;
+                    case CmdType.ADD_FRIEND:
+                        handSearch();
+                        break;
+                    case CmdType.SEND_GROUP_MSG:
+                        handSearch();
+                        break;
+                    case CmdType.ACCEPT_FRIENG_REQUEST:
+                        handContact();
+                        break;
+                    case CmdType.ADD_GROUP_MEMBER:
+                    case CmdType.INVITE_JOIN_GROUP:
+                        handSearch();
+                        break;
+                    case CmdType.REMOVE_GROUP_MEMBER:
+                        handSearch();
+                        break;
+                    case CmdType.TRANSFER_GROUP_OWNER:
+                        handSearch();
+                        break;
+                    case CmdType.CALLBACK_MSG:
+                        RecallMessageHandler.getInstance().findMessage(curEntity);
+                        break;
+                    case CmdType.ADDFRIEND_BY_CONGRGOUP:
+                        handSearch();
+                        break;
+                    case CmdType.ADD_REMARK:
+                        handSearch();
+                        break;
+                    case CmdType.UPDATA_GROUP_NOTICE:
+                        handSearch();
+                        break;
+                    case CmdType.RENAME_GROUP:
+                        handSearch();
+                        break;
+                    case CmdType.ADD_GROUP_CONTACT:
+                        handSearch();
+                        break;
+                    case CmdType.TRANSMIT_MSG:
+                        handSearch();
+                        break;
+                    case CmdType.INSTAL_APP:
+                        InstallApkEntity entity = (InstallApkEntity) curEntity.getData();
+                        if (entity != null && entity.getUrl() != null) {
+                            InstallHelper.checkUpdate(entity.getVer());
+                        } else {
+                            curEntity.setOpSuccess(false);
+                        }
+                        break;
+                    case CmdType.MASS_SEND_MSG:
+                        handSearch();
+                        break;
+                    case CmdType.USER_IMAGE_CODE:
+                        handMine();
+                        break;
+                    case CmdType.ACCEPT_JOIN_GROUP_INVITE:
+                        handSearch();
+                        break;
+                    case CmdType.REC_FILE_MSG:
+                    case CmdType.REC_IMG_MSG:
+                        handSearch();
+                        break;
+                }
+            } else {//微信外 打开微信页面
+                if (curEntity.getCmdType() == CmdType.LOGIN_WX_AUTOMATIC) {
+                    WeChatLoginHandler.getInstance().loginWeChat();
+                } else {
+                    AccessibilityHelper.getInstance().mSleep(500);
+                    AccessibilityHelper.getInstance().mSleep(3000);
+                    handMessage();
+                }
+            }
+        } else {
+            Log.e(TAG, "handMessage: 当前操作为空,执行终止");
+        }
+    }
+
+    ```
+
+* AccessibilityEvent事件分发
+
+    ```
+        @Override
+        public void onAccessibilityEvent(AccessibilityEvent event) {
+            if (!Config.getIsLogin() || !WeChatLoginHandler.getInstance().checkWXLoginState()) {//如果未登录
+                AccessibilityHelper.getInstance().findNoteInfoById(WeChatViewIdConstant.DIALOG_CONFIRM_RIGHT_ITEM_ID, true);
+                WeChatLoginHandler.getInstance().loginWeChat();
+                return;
+            }
+            if (AccessibilityHelper.getInstance().isRightUIByUIName("VideoActivity")) {
+                //有视频电话 或 语音电话 立刻挂断
+                AccessibilityHelper.getInstance().findNoteInfoByText("挂断", true);
+                return;
+            }
+            if (curEntity != null && event.getSource() != null && !TextUtils.isEmpty(event.getSource().getPackageName())) {
+                if (WX_PACKAGE_NAME.equals(event.getSource().getPackageName().toString())) {
+                    switch (event.getEventType()) {
+                        case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED://窗口内容变化
+                            windowsContentChanged(event);
+                            Log.i(TAG, "onAccessibilityEvent: TYPE_WINDOW_CONTENT_CHANGED");
+                            break;
+                        case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                            windowsStateChanged();
+                            Log.i(TAG, "onAccessibilityEvent: TYPE_WINDOW_STATE_CHANGED");
+                            break;
+                        default:
+                            Log.i(TAG, "onAccessibilityEvent: " + event.getEventType());
+                            break;
+                    }
+                }
+            }
+        }
+    ```
+
+* 根据不同的指令分发到不同的处理器
+    ```
+      private void windowsStateChanged() {
+            if (curEntity == null)
+                return;
+            switch (curEntity.getCmdType()) {
+                case CmdType.SEND_TXT_MSG:
+                    dispatchStateChanged(curEntity);
+                    break;
+                case CmdType.ADD_FRIEND:
+                    dispatchAddFriendState(curEntity);
+                case CmdType.CREATE_GROUP:
+                    CreateGroupHandler.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.SEND_GROUP_MSG:
+                    RelayGroupMessageHandler.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.ACCEPT_FRIENG_REQUEST:
+                    AgreeFriendHandler.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.USER_IMAGE_CODE:
+                    UserImageCodeHandler.getInstance().startAction(curEntity);
+                    break;
+                case CmdType.ADD_GROUP_MEMBER:
+                case CmdType.INVITE_JOIN_GROUP:
+                    GroupManager.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.REMOVE_GROUP_MEMBER:
+                    GroupManager.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.TRANSFER_GROUP_OWNER:
+                    GroupManager.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.UPDATA_GROUP_NOTICE:
+                    GroupManager.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.RENAME_GROUP:
+                    GroupManager.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.ADD_GROUP_CONTACT:
+                    GroupManager.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.CALLBACK_MSG:
+                    RecallMessageHandler.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.ADD_REMARK:
+                    RemarkUserHandler.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.TRANSMIT_MSG:
+                    RelayMessageHandler.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.MASS_SEND_MSG:
+                    MassSendMsgHandler.getInstance().windowsStateChanged(curEntity);
+                    break;
+                case CmdType.ACCEPT_JOIN_GROUP_INVITE:
+                    AcceptGroupInviteHandler.getInstance().windowsStateChanged(curEntity);
+                    break;
+            }
+        }
+    ```
