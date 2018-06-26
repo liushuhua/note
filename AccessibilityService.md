@@ -318,3 +318,44 @@
             }
         }
     ```
+
+* 动作执行
+
+    ```
+     private void findGroup(final BaseEntity curEntity) {
+            Chatroom chatroom = (Chatroom) curEntity.getData();
+            if (chatroom == null) return;
+            switch (curEntity.getStepPosition()) {
+                case 1://粘贴 ---> 搜素群
+                    searchGroup(curEntity, chatroom);
+                    break;
+                case 2:
+                    clickSearchGroup(curEntity,chatroom);
+                    break;
+                case 3://进入聊天页面，点击右上角按钮，进入群设置页面
+                    clickChatRight(curEntity);
+                    break;
+                case 4://进入群设置页面,
+                    if (curEntity.getCmdType() != CmdType.ADD_GROUP_CONTACT) {
+                        selectButton(curEntity);
+                    }
+                    break;
+            }
+        }
+
+
+        private void clickSearchGroup(BaseEntity curEntity,Chatroom chatroom) {
+                if (AccessibilityHelper.getInstance().isRightUIByUIName(WX_SEARCH_PAGE)) {
+                    //因为有的群名字过长 所以用id
+                    AccessibilityHelper.getInstance().mSleep(1000);
+                    if (AccessibilityHelper.getInstance().clickNodeByIdText(WeChatViewIdConstant.SEARCH_PAGE_RESULT_ITEM_ID, chatroom.getChatroomNickname())) {
+                        curEntity.setStepPosition(3);
+                    } else {
+                        AccessibilityHelper.getInstance().retry();
+                    }
+                }
+            }
+    ```
+* 常用ADB指令
+
+     []() http://zmywly8866.github.io/2015/01/24/all-adb-command.html
