@@ -362,6 +362,7 @@
      * input tap X Y   点击
      * input swipe X Y NX NY Time  滑动
      * pm install -r path
+     * dumpsys activity |grep "mFocusedActivity"
      * reboot 重启
      * kill -9 杀进程
      * ps | grep xx
