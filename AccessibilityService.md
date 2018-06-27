@@ -358,4 +358,12 @@
     ```
 * 常用ADB指令
 
-     []() http://zmywly8866.github.io/2015/01/24/all-adb-command.html
+
+     * input tap X Y   点击
+     * input swipe X Y NX NY Time  滑动
+     * pm install -r path
+     * reboot 重启
+     * kill -9 杀进程
+     * ps | grep xx
+
+    []() http://zmywly8866.github.io/2015/01/24/all-adb-command.html
