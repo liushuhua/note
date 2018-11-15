@@ -1,0 +1,47 @@
+   lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    signingConfigs {
+        signingConfig {
+            keyAlias 'xxxx'
+            keyPassword 'xxxx'
+            storeFile file("xxxx.jks")
+            storePassword 'xxxx'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.signingConfig
+        }
+        debug {
+            if ("true".equals(IS_JENKINS)) {
+                minifyEnabled true
+                zipAlignEnabled true
+                shrinkResources true
+                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                signingConfig signingConfigs.signingConfig
+            }
+        }
+    }
+    repositories {
+        flatDir {
+            dirs 'libs' //this way we can find the .aar file in libs folder
+        }
+    }
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            if ("true".equals(IS_JENKINS)) {
+                outputFileName = "${variant.name}_" + APP_VERSION + ".apk"
+            } else {
+                outputFileName = "${variant.name}_${variant.versionName}.apk"
+            }
+        }
+    }
+}
+
+// APP_VERSION、IS_JENKINS = false(均配置于：gradle.properties文件)
