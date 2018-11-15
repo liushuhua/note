@@ -89,8 +89,8 @@
 
         **备注：**
 
-        1.<font color="#FF0000" size="5" face="微软雅黑">Matrix_${BUILD_TYPE}_${APP_VERSION}</font><br>
-            <img src="http://jenkins.xesoa.com/job/Crm-Android-Matrix/ws/qrcode/${BUILD_TYPE}_${APP_VERSION}.png"><br>
-            <a target="_blank" href="http://jenkins.xesoa.com/job/Crm-Android-Matrix/ws/app/build/outputs/apk/${BUILD_TYPE}/${BUILD_TYPE}_${APP_VERSION}.apk">点击下载</a>
+        1. 样式：
+
+            ![](image/jenkins_qr_style.png)
 
         2. node script/qr.js http://jenkins.xesoa.com/job/Crm-Android-Matrix/ws/app/build/outputs/apk/${BUILD_TYPE}/${BUILD_TYPE}_${APP_VERSION}.apk qrcode/${BUILD_TYPE}_${APP_VERSION}.png
