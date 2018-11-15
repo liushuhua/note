@@ -93,4 +93,14 @@
 
             ![](image/jenkins_qr_style.png)
 
-        2. node script/qr.js http://jenkins.xesoa.com/job/Crm-Android-Matrix/ws/app/build/outputs/apk/${BUILD_TYPE}/${BUILD_TYPE}_${APP_VERSION}.apk qrcode/${BUILD_TYPE}_${APP_VERSION}.png
+        2. node script/qr.js http://jenkins.xesoa.com/job/Crm-Android-Matrix/ws/app/build/outputs/apk/${BUILD_TYPE}/${BUILD_TYPE}_${APP_VERSION}.apk qrcode/${BUILD_TYPE}_${APP_VERSION}.png        
+        
+        3. 脚本来源：      
+        
+            https://github.com/dumingxin/jenkinsNode
+            
+        4. 脚本使用：        
+            
+            首先需要安装nodejs，然后在代码目录执行npm install,最后执行node web.js启动静态文件服务即可。如果想后台运行可以使用pm2启动web.js      
+                    
+        5. 全文参照：https://blog.csdn.net/ncepudmx/article/details/77451314
