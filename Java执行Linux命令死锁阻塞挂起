@@ -1,0 +1,45 @@
+public class ExecUtils {
+    private static final String TAG = "ExecUtils";
+    private static ExecutorService executor;
+
+    static {
+        //根据实际情况创建线程池
+        executor = Executors.newFixedThreadPool(2 * 3 + 1 + 2);
+    }
+
+    public static boolean exec(String cmd) throws IOException, InterruptedException {
+        String[] cmds = {"su",
+                "-c", cmd};
+        Process process = Runtime.getRuntime().exec(cmds);
+
+        //消费正常日志
+        clearStream(process.getInputStream());
+        //消费错误日志
+        clearStream(process.getErrorStream());
+
+        //i为返回值，判断是否执行成功
+        int i = process.waitFor();
+
+        return i == 0;
+    }
+
+    private static void clearStream(final InputStream stream) {
+        //处理buffer的线程
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                String line;
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(stream))) {
+                    while ((line = in.readLine()) != null) {
+                        if (line.contains("LAT:") && line.contains("LON:")) {
+                            executor.shutdown();
+                            return;
+                        }
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "exec error:", e);
+                }
+            }
+        });
+    }
+}
